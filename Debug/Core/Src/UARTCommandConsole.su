@@ -1,0 +1,3 @@
+../Core/Src/UARTCommandConsole.c:92:6:vUARTCommandConsoleStart	32	static
+../Core/Src/UARTCommandConsole.c:108:13:prvUARTCommandConsoleTask	40	static
+../Core/Src/UARTCommandConsole.c:225:6:vOutputString	24	static

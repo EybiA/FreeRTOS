@@ -56,7 +56,7 @@ typedef enum
 
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
-#define HAL_MAX_DELAY      0xFFFFFFFFU
+#define HAL_MAX_DELAY      0x0U
 
 #define HAL_IS_BIT_SET(REG, BIT)         (((REG) & (BIT)) == (BIT))
 #define HAL_IS_BIT_CLR(REG, BIT)         (((REG) & (BIT)) == 0U)

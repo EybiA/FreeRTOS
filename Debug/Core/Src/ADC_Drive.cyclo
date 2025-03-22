@@ -1,3 +1,0 @@
-ADC_Drive.c:19:13:MX_ADC1_Init	3
-ADC_Drive.c:61:13:MX_DAC_Init	3
-ADC_Drive.c:84:16:read_ADC	2

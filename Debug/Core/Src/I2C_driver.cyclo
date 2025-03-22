@@ -1,2 +1,0 @@
-I2C_driver.c:27:13:MX_I2C1_Init	2
-I2C_driver.c:46:16:I2C_read_temp_sensor	4

@@ -1,0 +1,4 @@
+../Core/Src/CLI-commands.c:167:6:vRegisterCLICommands	8	static
+../Core/Src/CLI-commands.c:194:19:prvTaskStatsCommand	40	static
+../Core/Src/CLI-commands.c:295:19:prvThreeParameterEchoCommand	48	static
+../Core/Src/CLI-commands.c:362:19:prvParameterEchoCommand	40	static

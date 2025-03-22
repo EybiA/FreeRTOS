@@ -1,3 +1,0 @@
-../Core/Src/ADC_Drive.c:19:13:MX_ADC1_Init	24	static
-../Core/Src/ADC_Drive.c:61:13:MX_DAC_Init	16	static
-../Core/Src/ADC_Drive.c:84:16:read_ADC	8	static

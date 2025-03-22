@@ -1,2 +1,0 @@
-../Core/Src/SPI_driver.c:19:13:MX_SPI2_Init	8	static
-../Core/Src/SPI_driver.c:42:16:SPI_read	16	static
