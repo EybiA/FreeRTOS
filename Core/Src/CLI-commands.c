@@ -167,9 +167,9 @@ static const CLI_Command_Definition_t xParameterEcho =
 void vRegisterCLICommands( void )
 {
 	/* Register all the command line commands defined immediately above. */
-	FreeRTOS_CLIRegisterCommand( &xTaskStats );	
-	FreeRTOS_CLIRegisterCommand( &xThreeParameterEcho );
-	FreeRTOS_CLIRegisterCommand( &xParameterEcho );
+	//FreeRTOS_CLIRegisterCommand( &xTaskStats );	
+	//FreeRTOS_CLIRegisterCommand( &xThreeParameterEcho );
+	//FreeRTOS_CLIRegisterCommand( &xParameterEcho );
 
 	#if( configGENERATE_RUN_TIME_STATS == 1 )
 	{

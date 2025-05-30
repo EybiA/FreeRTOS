@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __I2C_H__
-#define __I2C_H__
+#ifndef INC_I2C_DRIVER_H_
+#define INC_I2C_DRIVER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,13 +34,8 @@ extern "C" {
 
 extern I2C_HandleTypeDef hi2c1;
 
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
-
-void MX_I2C1_Init(void);
-
-/* USER CODE BEGIN Prototypes */
+extern void MX_I2C1_Init(void);
+extern int16_t I2C_read_temp_sensor();
 
 /* USER CODE END Prototypes */
 
@@ -48,5 +43,5 @@ void MX_I2C1_Init(void);
 }
 #endif
 
-#endif /* __I2C_H__ */
+#endif /* INC_I2C_DRIVER_H_ */
 
