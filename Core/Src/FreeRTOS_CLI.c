@@ -71,16 +71,15 @@ static const CLI_Command_Definition_t xHelpCommand =
 	"\r\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<CLI supported commands >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n"
 	"\r================================================================================================\r\n"
 	"\rhelp                : list of supported commands\r\n"
+	"regs                  : STM32F446 registers memory mapping addresses\r\n"
 	"rd <xxxx>             : read a register address <xxxx>\r\n"
-	"dump <xxxx> <yyyy>    : register dump from address <xxxx> # of addresses <yyyy> (32 bit each)\r\n"
 	"wr <xxxx> <yyyy>      : write to a register <xxxx> value <yyyy>\r\n"
+	"dump <xxxx> <yyyy>    : register dump from address <xxxx> # of addresses <yyyy> (32 bit each)\r\n"
 	"temp                  : read temperature sensor value\r\n"
-	"spi                   : allow host to send an SPI command to MCU SPI slave interface\r\n"
 	"adc                   : print analog reading from MCU ADC interface (pin A5 input)\r\n"
 	"dac <lvl in mV in hex>: output on MCU PA4 pin the DAC output analog voltage corresponding to the voltage level in mV in hex format\r\n"
-	"gpio                  : toggle GPIO PA#5 (i.e., blinking LED on the board\r\n"
-	"regs                  : ST32F446 registers memory mapping addresses\r\n"
-	"quit                  : Exit Command Line terminal\r\n"
+	"gpio                  : stop/resume GPIO PA#5 blinking LED on the board\r\n"
+	"\rrun-time-stats      : displays a table showing how much processing time each FreeRTOS task has used\r\n"
 	"\r=========================================================================================================\r\n",
 	prvHelpCommand,
 	0

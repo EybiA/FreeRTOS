@@ -1,12 +1,12 @@
 #include "stdio.h"
 #include "string.h"
 #include "stdint.h"
+#include <stdbool.h>
 
 #include "main.h"
 #include "cmsis_os.h"
 #include "FreeRTOS_CLI.h"
-#include "dma.h"
-#include "gpio.h"
+
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -14,16 +14,17 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 void MX_USART2_UART_Init(void);
-void write_register(unsigned int addr, unsigned int val);
 void StartDefaultTask(void *argument);
-static void GPIO_blink();
+void write_register(unsigned int addr, unsigned int val);
 
 /* ------------------------Private variables -----------------------------------------------*/
 
 UART_HandleTypeDef huart2;
+extern bool xGpioMutex = true;
 
 /* -----------------------Definitions for defaultTask -------------------------------------- */
 osThreadId_t defaultTaskHandle;
+
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
@@ -56,7 +57,7 @@ int main(void)
 {
 	HAL_Init();
 	SystemClock_Config();
-	MX_GPIO_Init();
+  MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   vRegisterCLICommands();
@@ -65,8 +66,8 @@ int main(void)
     write_register (0x4002040c,0x5100); // required for setting I2C #1 pins with internal pull ups
     write_register (0x40020000,0xA80087A0);  // configuring PA5 pin to GPIO
     
-    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n");    
-
+    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n");  
+       
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
     vUARTCommandConsoleStart(configUART_COMMAND_CONSOLE_STACK_SIZE,configUART_COMMAND_CONSOLE_TASK_PRIORITY);
@@ -131,26 +132,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE END Callback 1 */
 }
 
-void write_register(unsigned int addr, unsigned int val)
-{
-
-	*((unsigned int *)addr)=((unsigned int *)val);
-
-
-}
-
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   GPIO_PinState PinState = GPIO_PIN_SET;
 
   /* Infinite loop */
-  for(;;)
-  {
-	PinState = !PinState;
-	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, PinState);
-    osDelay(1000);
-  }
+   
+      for(;;)
+      {
+          if (xGpioMutex == true) {
+          PinState = !PinState;
+          }
+          HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, PinState);
+          osDelay(1000);
+          
+      }
+
+    
+
   /* USER CODE END 5 */
 }
 
@@ -182,14 +182,10 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-void GPIO_blink()
+void write_register(unsigned int addr, unsigned int val)
 {
 
-	 write_register (0x40020000,0xA80087A0);  // configuring PA5 pin to GPIO
-	 write_register (0x40020014,0x20);        // setting the bit to HIGH
-	 HAL_Delay(2500);
-	 write_register (0x40020014,0x0);         // setting the bit to LOW
+	*((unsigned int *)addr)=((unsigned int *)val);
 
-	// write_register (0x40020000,0xA8008FA0);  // configuring PA5 GPIO back to
-                                              // analog mode
+
 }

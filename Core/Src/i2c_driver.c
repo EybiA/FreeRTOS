@@ -18,7 +18,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "i2c_driver.h"
+#include "main.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */

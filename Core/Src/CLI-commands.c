@@ -42,9 +42,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* FreeRTOS+CLI includes. */
 #include "FreeRTOS_CLI.h"
+#include "cmsis_os.h"
+#include "main.h"
+
 
 #ifndef  configINCLUDE_TRACE_RELATED_CLI_COMMANDS
 	#define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
@@ -63,23 +67,28 @@
  * Implements the task-stats command.
  */
 static BaseType_t prvTaskStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvTaskRegsCommand();
+static BaseType_t prvTaskGPIOCommand();
+
+#ifdef SENSORS
+	static BaseType_t prvTempCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+	static const CLI_Command_Definition_t xTemp =
+		{
+			"temp", /* The command string to type. */
+			"",
+			prvTempCommand, /* The function to run. */
+			0 /* No parameters are expected. */
+		};
+#endif
 
 /*
- * Implements the run-time-stats command.
- */
-#if( configGENERATE_RUN_TIME_STATS == 1 )
-	static BaseType_t prvRunTimeStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
-#endif /* configGENERATE_RUN_TIME_STATS */
 
 /*
  * Implements the echo-three-parameters command.
  */
-static BaseType_t prvThreeParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
-
-/*
- * Implements the echo-parameters command.
- */
-static BaseType_t prvParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvReadCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvWriteCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the "query heap" command.
@@ -88,56 +97,60 @@ static BaseType_t prvParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBuf
 	static BaseType_t prvQueryHeapCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 #endif
 
-/*
- * Implements the "trace start" and "trace stop" commands;
- */
-#if( configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1 )
-	static BaseType_t prvStartStopTraceCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
-#endif
 
 /* Structure that defines the "task-stats" command line command.  This generates
 a table that gives information on each task in the system. */
-static const CLI_Command_Definition_t xTaskStats =
+static const CLI_Command_Definition_t xRegsStats =
 {
-	"task-stats", /* The command string to type. */
-	"\r\ntask-stats:\r\n Displays a table showing the state of each FreeRTOS task\r\n",
-	prvTaskStatsCommand, /* The function to run. */
+	"regs", /* The command string to type. */
+	"",
+	prvTaskRegsCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
 
-/* Structure that defines the "echo_3_parameters" command line command.  This
-takes exactly three parameters that the command simply echos back one at a
-time. */
-static const CLI_Command_Definition_t xThreeParameterEcho =
+
+static const CLI_Command_Definition_t xRdRegsiter =
 {
-	"echo-3-parameters",
-	"\r\necho-3-parameters <param1> <param2> <param3>:\r\n Expects three parameters, echos each in turn\r\n",
-	prvThreeParameterEchoCommand, /* The function to run. */
-	3 /* Three parameters are expected, which can take any value. */
+	"rd",
+	"",
+	prvReadCommand, /* The function to run. */
+	1 /* One parameter are expected, which can take any value. */
 };
 
-/* Structure that defines the "echo_parameters" command line command.  This
-takes a variable number of parameters that the command simply echos back one at
-a time. */
-static const CLI_Command_Definition_t xParameterEcho =
+static const CLI_Command_Definition_t xWrRegsiter =
 {
-	"echo-parameters",
-	"\r\necho-parameters <...>:\r\n Take variable number of parameters, echos each in turn\r\n",
-	prvParameterEchoCommand, /* The function to run. */
-	-1 /* The user can enter any number of commands. */
+	"wr",
+	"",
+	prvWriteCommand, /* The function to run. */
+	2 /* One parameter are expected, which can take any value. */
 };
 
-#if( configGENERATE_RUN_TIME_STATS == 1 )
+static const CLI_Command_Definition_t xDumpRegsiter =
+{
+	"dump",
+	"",
+	prvDumpCommand, /* The function to run. */
+	2 /* One parameter are expected, which can take any value. */
+};
+
+
+static const CLI_Command_Definition_t xGpio =
+{
+	"gpio", /* The command string to type. */
+	"",
+	prvTaskGPIOCommand, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
 	/* Structure that defines the "run-time-stats" command line command.   This
 	generates a table that shows how much run time each task has */
 	static const CLI_Command_Definition_t xRunTimeStats =
-	{
-		"run-time-stats", /* The command string to type. */
-		"\r\nrun-time-stats:\r\n Displays a table showing how much processing time each FreeRTOS task has used\r\n",
-		prvRunTimeStatsCommand, /* The function to run. */
-		0 /* No parameters are expected. */
-	};
-#endif /* configGENERATE_RUN_TIME_STATS */
+{
+	"run-time-stats", /* The command string to type. */
+	"",
+	prvTaskStatsCommand, /* The function to run. */
+	0 /* No parameters are expected. */
+};
 
 #if( configINCLUDE_QUERY_HEAP_COMMAND == 1 )
 	/* Structure that defines the "query_heap" command line command. */
@@ -150,26 +163,21 @@ static const CLI_Command_Definition_t xParameterEcho =
 	};
 #endif /* configQUERY_HEAP_COMMAND */
 
-#if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
-	/* Structure that defines the "trace" command line command.  This takes a single
-	parameter, which can be either "start" or "stop". */
-	static const CLI_Command_Definition_t xStartStopTrace =
-	{
-		"trace",
-		"\r\ntrace [start | stop]:\r\n Starts or stops a trace recording for viewing in FreeRTOS+Trace\r\n",
-		prvStartStopTraceCommand, /* The function to run. */
-		1 /* One parameter is expected.  Valid values are "start" and "stop". */
-	};
-#endif /* configINCLUDE_TRACE_RELATED_CLI_COMMANDS */
-
 /*-----------------------------------------------------------*/
 
 void vRegisterCLICommands( void )
 {
-	/* Register all the command line commands defined immediately above. */
-	//FreeRTOS_CLIRegisterCommand( &xTaskStats );	
-	//FreeRTOS_CLIRegisterCommand( &xThreeParameterEcho );
-	//FreeRTOS_CLIRegisterCommand( &xParameterEcho );
+	FreeRTOS_CLIRegisterCommand( &xRunTimeStats );	
+	FreeRTOS_CLIRegisterCommand( &xRegsStats );
+	FreeRTOS_CLIRegisterCommand( &xRdRegsiter);
+	FreeRTOS_CLIRegisterCommand( &xWrRegsiter);
+	FreeRTOS_CLIRegisterCommand( &xDumpRegsiter);
+	FreeRTOS_CLIRegisterCommand( &xGpio);
+	
+	#ifdef SENSORS
+		FreeRTOS_CLIRegisterCommand( &xTemp);
+	#endif
+
 
 	#if( configGENERATE_RUN_TIME_STATS == 1 )
 	{
@@ -202,6 +210,7 @@ BaseType_t xSpacePadding;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
+	pcWriteBuffer="";
 
 	/* Generate a table of task stats. */
 	strcpy( pcWriteBuffer, "Task" );
@@ -249,52 +258,10 @@ BaseType_t xSpacePadding;
 #endif /* configINCLUDE_QUERY_HEAP */
 /*-----------------------------------------------------------*/
 
-#if( configGENERATE_RUN_TIME_STATS == 1 )
-	
-	static BaseType_t prvRunTimeStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
-	{
-	const char * const pcHeader = "  Abs Time      % Time\r\n****************************************\r\n";
-	BaseType_t xSpacePadding;
-
-		/* Remove compile time warnings about unused parameters, and check the
-		write buffer is not NULL.  NOTE - for simplicity, this example assumes the
-		write buffer length is adequate, so does not check for buffer overflows. */
-		( void ) pcCommandString;
-		( void ) xWriteBufferLen;
-		configASSERT( pcWriteBuffer );
-
-		/* Generate a table of task stats. */
-		strcpy( pcWriteBuffer, "Task" );
-		pcWriteBuffer += strlen( pcWriteBuffer );
-
-		/* Pad the string "task" with however many bytes necessary to make it the
-		length of a task name.  Minus three for the null terminator and half the
-		number of characters in	"Task" so the column lines up with the centre of
-		the heading. */
-		for( xSpacePadding = strlen( "Task" ); xSpacePadding < ( configMAX_TASK_NAME_LEN - 3 ); xSpacePadding++ )
-		{
-			/* Add a space to align columns after the task's name. */
-			*pcWriteBuffer = ' ';
-			pcWriteBuffer++;
-
-			/* Ensure always terminated. */
-			*pcWriteBuffer = 0x00;
-		}
-
-		strcpy( pcWriteBuffer, pcHeader );
-		vTaskGetRunTimeStats( pcWriteBuffer + strlen( pcHeader ) );
-
-		/* There is no more data to return after this single string, so return
-		pdFALSE. */
-		return pdFALSE;
-	}
-	
-#endif /* configGENERATE_RUN_TIME_STATS */
-/*-----------------------------------------------------------*/
-
-static BaseType_t prvThreeParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+static BaseType_t prvReadCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 const char *pcParameter;
+unsigned int  data;
 BaseType_t xParameterStringLength, xReturn;
 static UBaseType_t uxParameterNumber = 0;
 
@@ -304,28 +271,12 @@ static UBaseType_t uxParameterNumber = 0;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
-
-	if( uxParameterNumber == 0 )
-	{
-		/* The first time the function is called after the command has been
-		entered just a header string is returned. */
-		sprintf( pcWriteBuffer, "The three parameters were:\r\n" );
-
-		/* Next time the function is called the first parameter will be echoed
-		back. */
-		uxParameterNumber = 1U;
-
-		/* There is more data to be returned as no parameters have been echoed
-		back yet. */
-		xReturn = pdPASS;
-	}
-	else
-	{
-		/* Obtain the parameter string. */
-		pcParameter = FreeRTOS_CLIGetParameter
+	
+	/* Obtain the parameter string. */
+	pcParameter = FreeRTOS_CLIGetParameter
 						(
 							pcCommandString,		/* The command string itself. */
-							uxParameterNumber,		/* Return the next parameter. */
+							1,		                /* Return the next parameter. */
 							&xParameterStringLength	/* Store the parameter string length. */
 						);
 
@@ -333,33 +284,18 @@ static UBaseType_t uxParameterNumber = 0;
 		configASSERT( pcParameter );
 
 		/* Return the parameter string. */
-		memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-		sprintf( pcWriteBuffer, "%d: ", ( int ) uxParameterNumber );
-		strncat( pcWriteBuffer, pcParameter, ( size_t ) xParameterStringLength );
-		strncat( pcWriteBuffer, "\r\n", strlen( "\r\n" ) + 1 );
+		
+		uintptr_t addr = (uintptr_t)strtoul(pcParameter, NULL, 0);
+		data=(*(volatile unsigned int*)(addr));
 
-		/* If this is the last of the three parameters then there are no more
-		strings to return after this one. */
-		if( uxParameterNumber == 3U )
-		{
-			/* If this is the last of the three parameters then there are no more
-			strings to return after this one. */
-			xReturn = pdFALSE;
-			uxParameterNumber = 0;
-		}
-		else
-		{
-			/* There are more parameters to return after this one. */
-			xReturn = pdTRUE;
-			uxParameterNumber++;
-		}
-	}
+		sprintf( pcWriteBuffer, "\r\nRegister 0x%x, value : 0x%x \r"  ,addr,data);
+		xReturn = pdFALSE;
 
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+static BaseType_t prvWriteCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 const char *pcParameter;
 BaseType_t xParameterStringLength, xReturn;
@@ -371,110 +307,165 @@ static UBaseType_t uxParameterNumber = 0;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
-
-	if( uxParameterNumber == 0 )
-	{
-		/* The first time the function is called after the command has been
-		entered just a header string is returned. */
-		sprintf( pcWriteBuffer, "The parameters were:\r\n" );
-
-		/* Next time the function is called the first parameter will be echoed
-		back. */
-		uxParameterNumber = 1U;
-
-		/* There is more data to be returned as no parameters have been echoed
-		back yet. */
-		xReturn = pdPASS;
-	}
-	else
-	{
-		/* Obtain the parameter string. */
-		pcParameter = FreeRTOS_CLIGetParameter
+	
+	/* Obtain the parameter string. */
+	pcParameter = FreeRTOS_CLIGetParameter
 						(
 							pcCommandString,		/* The command string itself. */
-							uxParameterNumber,		/* Return the next parameter. */
+							1,		                /* Return the next parameter. */
 							&xParameterStringLength	/* Store the parameter string length. */
 						);
 
-		if( pcParameter != NULL )
-		{
-			/* Return the parameter string. */
-			memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-			sprintf( pcWriteBuffer, "%d: ", ( int ) uxParameterNumber );
-			strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t ) xParameterStringLength );
-			strncat( pcWriteBuffer, "\r\n", strlen( "\r\n" ) + 1);
+		configASSERT( pcParameter );
+		uintptr_t addr = (uintptr_t)strtoul(pcParameter, NULL, 0);
 
-			/* There might be more parameters to return after this one. */
-			xReturn = pdTRUE;
-			uxParameterNumber++;
-		}
-		else
-		{
-			/* No more parameters were found.  Make sure the write buffer does
-			not contain a valid string. */
-			pcWriteBuffer[ 0 ] = 0x00;
+		pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							2,		                /* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
 
-			/* No more data to return. */
-			xReturn = pdFALSE;
+		configASSERT( pcParameter );
+		uintptr_t data = (uintptr_t)strtoul(pcParameter, NULL, 0);
 
-			/* Start over the next time this command is executed. */
-			uxParameterNumber = 0;
-		}
-	}
+	    *((unsigned int *)addr)=((unsigned int *)data);
+
+		sprintf( pcWriteBuffer, "\r\nRegister 0x%x, set to value : 0x%x \r"  ,addr,data);
+		xReturn = pdFALSE;
 
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
 
-#if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
 
-	static BaseType_t prvStartStopTraceCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
-	{
-	const char *pcParameter;
-	BaseType_t lParameterStringLength;
+static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+const char *pcParameter;
+unsigned int  data;
+char *pcWriteTempBuffer;
+BaseType_t xParameterStringLength, xReturn;
+static UBaseType_t uxParameterNumber = 0;
+int i=0;
 
-		/* Remove compile time warnings about unused parameters, and check the
-		write buffer is not NULL.  NOTE - for simplicity, this example assumes the
-		write buffer length is adequate, so does not check for buffer overflows. */
-		( void ) pcCommandString;
-		( void ) xWriteBufferLen;
-		configASSERT( pcWriteBuffer );
+	/* Remove compile time warnings about unused parameters, and check the
+	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	write buffer length is adequate, so does not check for buffer overflows. */
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	pcWriteBuffer="";
 
-		/* Obtain the parameter string. */
+	/* Obtain the parameter string. */
+	pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,		                /* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
+
+		configASSERT( pcParameter );
+		uintptr_t addr = (uintptr_t)strtoul(pcParameter, NULL, 0);
+
 		pcParameter = FreeRTOS_CLIGetParameter
 						(
 							pcCommandString,		/* The command string itself. */
-							1,						/* Return the first parameter. */
-							&lParameterStringLength	/* Store the parameter string length. */
+							2,		                /* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
 						);
 
-		/* Sanity check something was returned. */
 		configASSERT( pcParameter );
+		uintptr_t count = (uintptr_t)strtoul(pcParameter, NULL, 0);
 
-		/* There are only two valid parameter values. */
-		if( strncmp( pcParameter, "start", strlen( "start" ) ) == 0 )
+		for (i=0; i<count; i++)
 		{
-			/* Start or restart the trace. */
-			vTraceStop();
-			vTraceClear();
-			vTraceStart();
-
-			sprintf( pcWriteBuffer, "Trace recording (re)started.\r\n" );
-		}
-		else if( strncmp( pcParameter, "stop", strlen( "stop" ) ) == 0 )
-		{
-			/* End the trace, if one is running. */
-			vTraceStop();
-			sprintf( pcWriteBuffer, "Stopping trace recording.\r\n" );
-		}
-		else
-		{
-			sprintf( pcWriteBuffer, "Valid parameters are 'start' and 'stop'.\r\n" );
+	    	data=(*(volatile unsigned int*)(addr));
+			printf("\r\nRegister 0x%x, value : 0x%x \r"  ,addr,data);
+			addr=addr+4;
 		}
 
-		/* There is no more data to return after this single string, so return
-		pdFALSE. */
-		return pdFALSE;
+		pcWriteBuffer="";
+		printf("\r\n");
+		xReturn = pdFALSE;
+
+	return xReturn;
+}
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvTaskRegsCommand()
+
+{
+	  printf("\r\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<ST32F446 Registers map >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n");
+	  printf("\r=========================================================================================================\r\n");
+	  printf("\rFLASH_BASE          : 0x08000000\r\n");
+	  printf("CCMDATARAM_BASE       : 0x10000000\r\n");
+	  printf("SRAM1_BASE            : 0x20000000\r\n");
+	  printf("SRAM2_BASE            : 0x2001C000\r\n");
+	  printf("SRAM3_BASE            : 0x20020000\r\n");
+	  printf("PERIPH_BASE           : 0x40000000\r\n");
+	  printf("Timers                : 0x40000000-0x400023FF\r\n");
+	  printf("RTC                   : 0x40002800-0x40002BFF\r\n");
+	  printf("SPI#2/I2S#2           : 0x40003800-0x40003BFF\r\n");
+	  printf("SPI#3/I2S#3           : 0x40003C00-0x40003FFF\r\n");
+	  printf("USART#2-UART5         : 0x40004400-0x400053FF\r\n");
+	  printf("I2C#1-#3              : 0x40005400-0x40005FFF\r\n");
+	  printf("DAC                   : 0x40007400-0x400077FF\r\n");
+	  printf("ADC#1-#3              : 0x40012000-0x400123FF\r\n");
+	  printf("SPI#1,#4              : 0x40013000-0x400137FF\r\n");
+	  printf("SYSCFG                : 0x40013800-0x40013BFF\r\n");
+	  printf("SAI #1,#2             : 0x40015800-0x40015FFF\r\n");
+	  printf("GPIOs                 : 0x40020000-0x40021FFF\r\n");
+	  printf("RCC                   : 0x40023800-0x40023BFF\r\n");
+	  printf("DMA#1, #2             : 0x40026000-0x400267FF\r\n");
+	  printf("DCMI                  : 0x50050000-0x500503FF\r\n");
+	  printf("\r=========================================================================================================\r\n");
+
+}
+
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvTaskGPIOCommand()
+
+{
+
+static UBaseType_t uxParameterNumber = 0;
+
+extern osThreadId_t defaultTaskHandle;
+extern bool xGpioMutex;
+static osStatus_t task_status;
+BaseType_t xReturn;
+
+if (uxParameterNumber==0) {
+	uxParameterNumber = 1;	
+	printf("\r\nGPIO LED toggling stopped!\r\n");
+	xGpioMutex = false;
+
+	}
+	else
+	{
+	uxParameterNumber = 0;
+	printf("\r\nGPIO LED toggling resumed!\r\n");
+	xGpioMutex =true;
 	}
 
-#endif /* configINCLUDE_TRACE_RELATED_CLI_COMMANDS */
+	xReturn = pdFALSE;
+
+}
+
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvTempCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+
+{
+
+int16_t temp;
+BaseType_t xReturn;
+
+
+temp = I2C_read_temp_sensor();
+sprintf( pcWriteBuffer, "\r\nTemperature is: %d\r\n",temp); 
+xReturn = pdFALSE;
+
+}
+
+/*-----------------------------------------------------------*/
