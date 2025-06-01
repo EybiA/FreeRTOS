@@ -6,6 +6,7 @@
 #include "cmsis_os.h"
 #include "FreeRTOS_CLI.h"
 #include "dma.h"
+#include "adc.h"
 #include "gpio.h"
 
 
@@ -21,6 +22,7 @@ static void GPIO_blink();
 /* ------------------------Private variables -----------------------------------------------*/
 
 UART_HandleTypeDef huart2;
+int16_t temp;
 
 /* -----------------------Definitions for defaultTask -------------------------------------- */
 osThreadId_t defaultTaskHandle;
@@ -65,7 +67,12 @@ int main(void)
     write_register (0x4002040c,0x5100); // required for setting I2C #1 pins with internal pull ups
     write_register (0x40020000,0xA80087A0);  // configuring PA5 pin to GPIO
     
-    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n");    
+    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n");  
+   
+    #ifdef SENSORS
+    temp = I2C_read_temp_sensor();
+	  printf("\r\nTemperature is: %d\r\n",temp);  
+    #endif
 
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 

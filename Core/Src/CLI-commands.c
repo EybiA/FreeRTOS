@@ -63,7 +63,7 @@
  * Implements the task-stats command.
  */
 static BaseType_t prvTaskStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
-
+static BaseType_t prvTaskRegsCommand();
 /*
  * Implements the run-time-stats command.
  */
@@ -97,11 +97,11 @@ static BaseType_t prvParameterEchoCommand( char *pcWriteBuffer, size_t xWriteBuf
 
 /* Structure that defines the "task-stats" command line command.  This generates
 a table that gives information on each task in the system. */
-static const CLI_Command_Definition_t xTaskStats =
+static const CLI_Command_Definition_t xRegsStats =
 {
-	"task-stats", /* The command string to type. */
-	"\r\ntask-stats:\r\n Displays a table showing the state of each FreeRTOS task\r\n",
-	prvTaskStatsCommand, /* The function to run. */
+	"regs", /* The command string to type. */
+	"",
+	prvTaskRegsCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
 
@@ -170,6 +170,7 @@ void vRegisterCLICommands( void )
 	//FreeRTOS_CLIRegisterCommand( &xTaskStats );	
 	//FreeRTOS_CLIRegisterCommand( &xThreeParameterEcho );
 	//FreeRTOS_CLIRegisterCommand( &xParameterEcho );
+	FreeRTOS_CLIRegisterCommand( &xRegsStats );
 
 	#if( configGENERATE_RUN_TIME_STATS == 1 )
 	{
@@ -426,6 +427,37 @@ static UBaseType_t uxParameterNumber = 0;
 }
 /*-----------------------------------------------------------*/
 
+static BaseType_t prvTaskRegsCommand()
+
+{
+		  printf("\r\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<ST32F446 Registers map >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n");
+	  printf("\r=========================================================================================================\r\n");
+	  printf("\rFLASH_BASE          : 0x08000000\r\n");
+	  printf("CCMDATARAM_BASE       : 0x10000000\r\n");
+	  printf("SRAM1_BASE            : 0x20000000\r\n");
+	  printf("SRAM2_BASE            : 0x2001C000\r\n");
+	  printf("SRAM3_BASE            : 0x20020000\r\n");
+	  printf("PERIPH_BASE           : 0x40000000\r\n");
+	  printf("Timers                : 0x40000000-0x400023FF\r\n");
+	  printf("RTC                   : 0x40002800-0x40002BFF\r\n");
+	  printf("SPI#2/I2S#2           : 0x40003800-0x40003BFF\r\n");
+	  printf("SPI#3/I2S#3           : 0x40003C00-0x40003FFF\r\n");
+	  printf("USART#2-UART5         : 0x40004400-0x400053FF\r\n");
+	  printf("I2C#1-#3              : 0x40005400-0x40005FFF\r\n");
+	  printf("DAC                   : 0x40007400-0x400077FF\r\n");
+	  printf("ADC#1-#3              : 0x40012000-0x400123FF\r\n");
+	  printf("SPI#1,#4              : 0x40013000-0x400137FF\r\n");
+	  printf("SYSCFG                : 0x40013800-0x40013BFF\r\n");
+	  printf("SAI #1,#2             : 0x40015800-0x40015FFF\r\n");
+	  printf("GPIOs                 : 0x40020000-0x40021FFF\r\n");
+	  printf("RCC                   : 0x40023800-0x40023BFF\r\n");
+	  printf("DMA#1, #2             : 0x40026000-0x400267FF\r\n");
+	  printf("DCMI                  : 0x50050000-0x500503FF\r\n");
+	  printf("\r=========================================================================================================\r\n");
+
+}
+
+/*-----------------------------------------------------------*/
 #if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
 
 	static BaseType_t prvStartStopTraceCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )

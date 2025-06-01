@@ -70,7 +70,7 @@ static const CLI_Command_Definition_t xHelpCommand =
 	"help",
 	"\r\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<CLI supported commands >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n"
 	"\r================================================================================================\r\n"
-	"\rhelp                : list of supported commands\r\n"
+	"\rhelp                   : list of supported commands\r\n"
 	"rd <xxxx>             : read a register address <xxxx>\r\n"
 	"dump <xxxx> <yyyy>    : register dump from address <xxxx> # of addresses <yyyy> (32 bit each)\r\n"
 	"wr <xxxx> <yyyy>      : write to a register <xxxx> value <yyyy>\r\n"

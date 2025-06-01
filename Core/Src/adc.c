@@ -27,8 +27,16 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
-/* ADC1 init function */
-void MX_ADC1_Init(void)
+uint16_t adc_dma_buf[10];
+int32_t sensorValue=0;
+int32_t voltage_lvl;
+int adc_conv_complete_flag;
+float voltage;
+
+/* ----------------------------------FUNCTIONS--------------------------------*/
+// ADC channel 5 configuration (GPIO PA5)
+
+extern void MX_ADC1_Init(void)
 {
 
   /* USER CODE BEGIN ADC1_Init 0 */
