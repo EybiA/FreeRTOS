@@ -89,6 +89,7 @@ static BaseType_t prvTaskGPIOCommand();
 static BaseType_t prvReadCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t prvWriteCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDACCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the "query heap" command.
@@ -142,6 +143,15 @@ static const CLI_Command_Definition_t xGpio =
 	0 /* No parameters are expected. */
 };
 
+static const CLI_Command_Definition_t xDAC =
+{
+	"dac",
+	"",
+	prvDACCommand, /* The function to run. */
+	1 /* One parameter are expected, which can take any value. */
+};
+
+
 	/* Structure that defines the "run-time-stats" command line command.   This
 	generates a table that shows how much run time each task has */
 	static const CLI_Command_Definition_t xRunTimeStats =
@@ -173,6 +183,7 @@ void vRegisterCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xWrRegsiter);
 	FreeRTOS_CLIRegisterCommand( &xDumpRegsiter);
 	FreeRTOS_CLIRegisterCommand( &xGpio);
+	FreeRTOS_CLIRegisterCommand( &xDAC);
 	
 	#ifdef SENSORS
 		FreeRTOS_CLIRegisterCommand( &xTemp);
@@ -210,7 +221,6 @@ BaseType_t xSpacePadding;
 	( void ) pcCommandString;
 	( void ) xWriteBufferLen;
 	configASSERT( pcWriteBuffer );
-	pcWriteBuffer="";
 
 	/* Generate a table of task stats. */
 	strcpy( pcWriteBuffer, "Task" );
@@ -468,4 +478,40 @@ xReturn = pdFALSE;
 
 }
 
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvDACCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+const char *pcParameter;
+BaseType_t xParameterStringLength, xReturn;
+static UBaseType_t uxParameterNumber = 0;
+
+	/* Remove compile time warnings about unused parameters, and check the
+	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	write buffer length is adequate, so does not check for buffer overflows. */
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	
+	/* Obtain the parameter string. */
+	pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,		                /* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
+
+		/* Sanity check something was returned. */
+		configASSERT( pcParameter );
+
+		/* Return the parameter string. */
+		
+		unsigned int data = (unsigned int)strtoul(pcParameter, NULL, 10);
+		DAC_generate(data);
+
+		sprintf( pcWriteBuffer, "\r\nPA5 pin voltage set to %d [mV]\r"  ,data);
+		xReturn = pdFALSE;
+
+	return xReturn;
+}
 /*-----------------------------------------------------------*/

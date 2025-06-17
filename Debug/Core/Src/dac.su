@@ -1,3 +1,6 @@
-../Core/Src/dac.c:31:6:MX_DAC_Init	16	static
-../Core/Src/dac.c:66:6:HAL_DAC_MspInit	48	static
-../Core/Src/dac.c:115:6:HAL_DAC_MspDeInit	16	static
+../Core/Src/dac.c:36:6:MX_DAC_Init	16	static
+../Core/Src/dac.c:71:6:HAL_DAC_MspInit	48	static
+../Core/Src/dac.c:120:6:HAL_DAC_MspDeInit	16	static
+../Core/Src/dac.c:149:13:DAC_output	16	static
+../Core/Src/dac.c:170:13:DAC_generate	16	static
+../Core/Src/dac.c:186:13:DAC_output_Stop	8	static

@@ -24,8 +24,13 @@
 
 /* USER CODE END 0 */
 
+uint16_t adc_dma_buf[10];
+int32_t sensorValue=0;
+int32_t voltage_lvl;
+
 DAC_HandleTypeDef hdac;
 DMA_HandleTypeDef hdma_dac1;
+TIM_HandleTypeDef htim3;
 
 /* DAC init function */
 void MX_DAC_Init(void)
@@ -139,6 +144,47 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* dacHandle)
   }
 }
 
-/* USER CODE BEGIN 1 */
+// ****************************************************************************
 
-/* USER CODE END 1 */
+extern void DAC_output(void)
+{
+	sensorValue=0;
+
+	if (HAL_DAC_Start(&hdac, DAC_CHANNEL_1) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+
+	for(size_t ind = 0; ind < 10; ++ind) {          //reading the ADC samples
+		sensorValue += (uint32_t)adc_dma_buf[ind];    //stored on SRAM by DMA
+	   }                                            // to output them to PA5 pin
+
+	sensorValue /=10;
+
+    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, sensorValue);
+
+}
+
+// ****************************************************************************
+
+extern void DAC_generate(unsigned int voltage)
+{
+
+	if (HAL_DAC_Start(&hdac, DAC_CHANNEL_1) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+
+	voltage_lvl= ((int)voltage)*(ADC_MAX_OUTPUT_VALUE/ADC_REFERENCE_VOLTAGE_MV);
+
+    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, voltage_lvl);
+
+}
+
+// ****************************************************************************
+
+extern void DAC_output_Stop(void)
+{
+	HAL_DAC_Stop(&hdac, DAC_CHANNEL_1);
+}
+// ****************************************************************************

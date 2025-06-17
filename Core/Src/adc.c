@@ -27,9 +27,9 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
-uint16_t adc_dma_buf[10];
-int32_t sensorValue=0;
-int32_t voltage_lvl;
+//uint16_t adc_dma_buf[10];
+//int32_t sensorValue=0;
+//int32_t voltage_lvl;
 int adc_conv_complete_flag;
 float voltage;
 

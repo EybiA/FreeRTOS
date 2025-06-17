@@ -68,5 +68,5 @@
     "gpio.h": "c"
   },
   "idf.pythonInstallPath": "C:\\Users\\Administrator\\.espressif\\tools\\idf-python\\3.8.7\\python.exe",
-  "cortex-debug.variableUseNaturalFormat": false
+  "cortex-debug.variableUseNaturalFormat": true
 }

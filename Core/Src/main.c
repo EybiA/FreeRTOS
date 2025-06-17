@@ -59,6 +59,7 @@ int main(void)
 	SystemClock_Config();
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_DAC_Init();
   MX_USART2_UART_Init();
   vRegisterCLICommands();
   osKernelInitialize();
@@ -66,8 +67,8 @@ int main(void)
     write_register (0x4002040c,0x5100); // required for setting I2C #1 pins with internal pull ups
     write_register (0x40020000,0xA80087A0);  // configuring PA5 pin to GPIO
     
-    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n");  
-       
+    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n"); 
+  
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
     vUARTCommandConsoleStart(configUART_COMMAND_CONSOLE_STACK_SIZE,configUART_COMMAND_CONSOLE_TASK_PRIORITY);

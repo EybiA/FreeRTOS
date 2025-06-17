@@ -1,8 +1,9 @@
-../Core/Src/CLI-commands.c:168:6:vRegisterCLICommands	8	static
-../Core/Src/CLI-commands.c:202:19:prvTaskStatsCommand	40	static
-../Core/Src/CLI-commands.c:261:19:prvReadCommand	56	static
-../Core/Src/CLI-commands.c:298:19:prvWriteCommand	56	static
-../Core/Src/CLI-commands.c:342:19:prvDumpCommand	64	static
-../Core/Src/CLI-commands.c:395:19:prvTaskRegsCommand	8	static
-../Core/Src/CLI-commands.c:427:19:prvTaskGPIOCommand	16	static
-../Core/Src/CLI-commands.c:457:19:prvTempCommand	32	static
+../Core/Src/CLI-commands.c:178:6:vRegisterCLICommands	8	static
+../Core/Src/CLI-commands.c:213:19:prvTaskStatsCommand	40	static
+../Core/Src/CLI-commands.c:271:19:prvReadCommand	56	static
+../Core/Src/CLI-commands.c:308:19:prvWriteCommand	56	static
+../Core/Src/CLI-commands.c:352:19:prvDumpCommand	64	static
+../Core/Src/CLI-commands.c:405:19:prvTaskRegsCommand	8	static
+../Core/Src/CLI-commands.c:437:19:prvTaskGPIOCommand	16	static
+../Core/Src/CLI-commands.c:467:19:prvTempCommand	32	static
+../Core/Src/CLI-commands.c:483:19:prvDACCommand	48	static
