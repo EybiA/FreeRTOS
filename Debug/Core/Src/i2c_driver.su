@@ -1,2 +1,0 @@
-../Core/Src/i2c_driver.c:40:13:MX_I2C1_Init	8	static
-../Core/Src/i2c_driver.c:59:16:I2C_read_temp_sensor	16	static

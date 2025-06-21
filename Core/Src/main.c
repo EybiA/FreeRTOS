@@ -55,27 +55,32 @@ GETCHAR_PROTOTYPE
 
 int main(void)
 {
-	HAL_Init();
-	SystemClock_Config();
+
+  float V;
+
+  HAL_Init();
+  SystemClock_Config();
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_ADC1_Init();
   MX_DAC_Init();
+  MX_TIM3_Init();
   MX_USART2_UART_Init();
   vRegisterCLICommands();
   osKernelInitialize();
 	 
-    write_register (0x4002040c,0x5100); // required for setting I2C #1 pins with internal pull ups
-    write_register (0x40020000,0xA80087A0);  // configuring PA5 pin to GPIO
+  write_register (0x4002040c,0x5100); // required for setting I2C #1 pins with internal pull ups
+  write_register (0x40020000,0xA80087AC);  // configuring PA5 pin to GPIO
     
-    printf("\r\n<<<<<<<Hello from ST32F4466RTE MCU UART (RTOS) terminal>>>>>\r\n"); 
-  
-    defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  printf("\r\n<<<<<<<Hello from STM32F446RTE MCU UART (RTOS) terminal>>>>>\r\n");
 
-    vUARTCommandConsoleStart(configUART_COMMAND_CONSOLE_STACK_SIZE,configUART_COMMAND_CONSOLE_TASK_PRIORITY);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-    osKernelStart();
+  vUARTCommandConsoleStart(configUART_COMMAND_CONSOLE_STACK_SIZE,configUART_COMMAND_CONSOLE_TASK_PRIORITY);
+
+  osKernelStart();
    
-    while(1){}
+  while(1){}
     
 }
 

@@ -81,6 +81,17 @@ static BaseType_t prvTaskGPIOCommand();
 		};
 #endif
 
+#ifdef ANALOG_IN
+	static BaseType_t prvADCCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+	static const CLI_Command_Definition_t xADC =
+		{
+			"adc", /* The command string to type. */
+			"",
+			prvADCCommand, /* The function to run. */
+			0 /* No parameters are expected. */
+		};
+#endif
+
 /*
 
 /*
@@ -189,6 +200,9 @@ void vRegisterCLICommands( void )
 		FreeRTOS_CLIRegisterCommand( &xTemp);
 	#endif
 
+	#ifdef ANALOG_IN
+		FreeRTOS_CLIRegisterCommand( &xADC);
+	#endif
 
 	#if( configGENERATE_RUN_TIME_STATS == 1 )
 	{
@@ -509,9 +523,28 @@ static UBaseType_t uxParameterNumber = 0;
 		unsigned int data = (unsigned int)strtoul(pcParameter, NULL, 10);
 		DAC_generate(data);
 
-		sprintf( pcWriteBuffer, "\r\nPA5 pin voltage set to %d [mV]\r"  ,data);
+		sprintf( pcWriteBuffer, "\r\nPA4 pin voltage set to %d [mV]\r"  ,data);
 		xReturn = pdFALSE;
 
 	return xReturn;
 }
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvADCCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+
+BaseType_t xReturn;
+float V=0;
+unsigned int data;
+
+V=read_ADC();
+
+data=(1000*V);
+
+sprintf( pcWriteBuffer, "\r\nVoltage measured at PA1 physical pin is: %d [mV]\r\n"  ,data);
+
+xReturn = pdFALSE;
+
+}
+
 /*-----------------------------------------------------------*/

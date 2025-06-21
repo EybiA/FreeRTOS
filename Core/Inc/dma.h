@@ -25,7 +25,6 @@
 extern "C" {
 #endif
 
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
@@ -39,7 +38,9 @@ extern "C" {
 
 /* USER CODE END Private defines */
 
-void MX_DMA_Init(void);
+//void MX_DMA_Init(void);
+
+extern MX_DMA_Init(ADC_HandleTypeDef *hadc);
 
 /* USER CODE BEGIN Prototypes */
 

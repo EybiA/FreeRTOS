@@ -24,13 +24,15 @@
 
 /* USER CODE END 0 */
 
-uint16_t adc_dma_buf[10];
-int32_t sensorValue=0;
-int32_t voltage_lvl;
 
 DAC_HandleTypeDef hdac;
 DMA_HandleTypeDef hdma_dac1;
-TIM_HandleTypeDef htim3;
+
+
+uint16_t dac_dma_buf[10];
+int32_t sensorValue=0;
+int32_t voltage_lvl;
+
 
 /* DAC init function */
 void MX_DAC_Init(void)
@@ -156,7 +158,7 @@ extern void DAC_output(void)
 	  }
 
 	for(size_t ind = 0; ind < 10; ++ind) {          //reading the ADC samples
-		sensorValue += (uint32_t)adc_dma_buf[ind];    //stored on SRAM by DMA
+		sensorValue += (uint32_t)dac_dma_buf[ind];    //stored on SRAM by DMA
 	   }                                            // to output them to PA5 pin
 
 	sensorValue /=10;

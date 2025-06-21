@@ -10,5 +10,5 @@
 ../Core/Src/stm32f4xx_it.c:215:6:I2C1_ER_IRQHandler	8	static
 ../Core/Src/stm32f4xx_it.c:229:6:SPI2_IRQHandler	8	static
 ../Core/Src/stm32f4xx_it.c:243:6:USART2_IRQHandler	8	static
-../Core/Src/stm32f4xx_it.c:254:6:TIM6_DAC_IRQHandler	8	static
-../Core/Src/stm32f4xx_it.c:271:6:DMA2_Stream0_IRQHandler	8	static
+../Core/Src/stm32f4xx_it.c:257:6:TIM6_DAC_IRQHandler	8	static
+../Core/Src/stm32f4xx_it.c:274:6:DMA2_Stream4_IRQHandler	8	static

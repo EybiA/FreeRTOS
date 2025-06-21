@@ -76,7 +76,7 @@ static const CLI_Command_Definition_t xHelpCommand =
 	"wr <xxxx> <yyyy>      : write to a register <xxxx> value <yyyy>\r\n"
 	"dump <xxxx> <yyyy>    : register dump from address <xxxx> # of addresses <yyyy> (32 bit each)\r\n"
 	"temp                  : read temperature sensor value\r\n"
-	"adc                   : print analog reading from MCU ADC interface (pin A5 input)\r\n"
+	"adc                   : print analog reading from MCU ADC interface (pin PA5 input)\r\n"
 	"dac <lvl in mV        : output on MCU PA4 pin the DAC output analog voltage corresponding to the voltage level in mV in hex format\r\n"
 	"gpio                  : stop/resume GPIO PA#5 blinking LED on the board\r\n"
 	"\rrun-time-stats      : displays a table showing how much processing time each FreeRTOS task has used\r\n"

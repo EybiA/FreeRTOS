@@ -1,8 +1,8 @@
 ../Core/Src/main.c:38:1:__io_putchar	16	static
 ../Core/Src/main.c:45:1:__io_getchar	16	static
 ../Core/Src/main.c:56:5:main	8	static
-../Core/Src/main.c:86:6:SystemClock_Config	88	static
-../Core/Src/main.c:123:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:136:6:StartDefaultTask	24	static
-../Core/Src/main.c:175:6:Error_Handler	4	static
-../Core/Src/main.c:186:6:write_register	16	static
+../Core/Src/main.c:91:6:SystemClock_Config	88	static
+../Core/Src/main.c:128:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:141:6:StartDefaultTask	24	static
+../Core/Src/main.c:180:6:Error_Handler	4	static
+../Core/Src/main.c:191:6:write_register	16	static

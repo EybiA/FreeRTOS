@@ -20,23 +20,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "spi.h"
 
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
 
 SPI_HandleTypeDef hspi2;
+
+
+/* ----------------------------------Functions------------------------*/
+
 
 /* SPI2 init function */
 void MX_SPI2_Init(void)
 {
 
-  /* USER CODE BEGIN SPI2_Init 0 */
-
-  /* USER CODE END SPI2_Init 0 */
-
-  /* USER CODE BEGIN SPI2_Init 1 */
-
-  /* USER CODE END SPI2_Init 1 */
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
@@ -58,6 +52,8 @@ void MX_SPI2_Init(void)
   /* USER CODE END SPI2_Init 2 */
 
 }
+
+// ****************************************************************************
 
 void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 {
@@ -109,6 +105,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
   }
 }
 
+// ****************************************************************************
+
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 {
 
@@ -138,6 +136,27 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
   }
 }
 
-/* USER CODE BEGIN 1 */
+// ****************************************************************************
 
-/* USER CODE END 1 */
+// ****************************************************************************
+
+extern uint8_t SPI_read(void)
+{
+
+	  uint8_t *buf=0;
+	  uint8_t response[]={0xab,0xcd,0xca,0xfe};
+
+	  while (!(HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_READY));
+
+	  HAL_SPI_Receive(&hspi2, &buf, 1,HAL_MAX_DELAY);
+
+	  if (buf==0x5) {
+
+		  HAL_SPI_Transmit(&hspi2, &response, 4,HAL_MAX_DELAY);
+
+	  }
+	  else Error_Handler();
+
+	  return &response;
+}
+

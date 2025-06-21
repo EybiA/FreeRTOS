@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    adc.h
+  * @file    tim.h
   * @brief   This file contains all the function prototypes for
-  *          the adc.c file
+  *          the tim.c file
   ******************************************************************************
   * @attention
   *
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __ADC_H__
-#define __ADC_H__
+#ifndef __TIM_H__
+#define __TIM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,19 +31,14 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-#define TEMP_SENSOR_AVG_SLOPE_MV_PER_CELSIUS                        2.5f
-#define TEMP_SENSOR_VOLTAGE_MV_AT_25                                760.0f
-#define ADC_REFERENCE_VOLTAGE_MV                                    3300.0f
-#define ADC_MAX_OUTPUT_VALUE                                        4095.0f
-extern ADC_HandleTypeDef hadc1;
+
+extern TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_ADC1_Init(void);
-extern void MX_ADC1_Init(void);
-extern float read_ADC(void);
+void MX_TIM3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -53,5 +48,5 @@ extern float read_ADC(void);
 }
 #endif
 
-#endif /* __ADC_H__ */
+#endif /* __TIM_H__ */
 

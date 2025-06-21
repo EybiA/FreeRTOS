@@ -31,9 +31,11 @@ extern "C" {
 #include "dma.h"
 #include "adc.h"
 #include "gpio.h"
-#include "i2c_driver.h"
+#include "i2c.h"
+#include "spi.h"
 
 #define SENSORS 1
+#define ANALOG_IN 1
 
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
