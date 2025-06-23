@@ -138,25 +138,31 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 
 // ****************************************************************************
 
-// ****************************************************************************
-
-extern uint8_t SPI_read(void)
+extern uint8_t SPI_read(uint8_t size)
 {
 
-	  uint8_t *buf=0;
-	  uint8_t response[]={0xab,0xcd,0xca,0xfe};
+	  uint8_t *response=0;
 
 	  while (!(HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_READY));
 
-	  HAL_SPI_Receive(&hspi2, &buf, 1,HAL_MAX_DELAY);
-
-	  if (buf==0x5) {
-
-		  HAL_SPI_Transmit(&hspi2, &response, 4,HAL_MAX_DELAY);
-
-	  }
-	  else Error_Handler();
+	  HAL_SPI_Receive(&hspi2, &response, size,HAL_MAX_DELAY);
 
 	  return &response;
 }
+
+// ****************************************************************************
+
+extern void SPI_write(uint8_t *buff)
+{
+
+	while (!(HAL_SPI_GetState(&hspi2) == HAL_SPI_STATE_READY));
+  
+  HAL_SPI_Transmit(&hspi2, &buff, 1,HAL_MAX_DELAY);
+
+}
+
+
+// ****************************************************************************
+
+
 

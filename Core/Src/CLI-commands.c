@@ -101,6 +101,8 @@ static BaseType_t prvReadCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 static BaseType_t prvWriteCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t prvDACCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvSPIReadCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvSPIWriteCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the "query heap" command.
@@ -173,16 +175,21 @@ static const CLI_Command_Definition_t xDAC =
 	0 /* No parameters are expected. */
 };
 
-#if( configINCLUDE_QUERY_HEAP_COMMAND == 1 )
-	/* Structure that defines the "query_heap" command line command. */
-	static const CLI_Command_Definition_t xQueryHeap =
-	{
-		"query-heap",
-		"\r\nquery-heap:\r\n Displays the free heap space, and minimum ever free heap space.\r\n",
-		prvQueryHeapCommand, /* The function to run. */
-		0 /* The user can enter any number of commands. */
-	};
-#endif /* configQUERY_HEAP_COMMAND */
+static const CLI_Command_Definition_t xSPIRd =
+{
+	"spi_r",
+	"",
+	prvSPIReadCommand, /* The function to run. */
+	1 /* One parameter are expected, which can take any value. */
+};
+
+static const CLI_Command_Definition_t xSPIWr =
+{
+	"spi_w",
+	"",
+	prvSPIWriteCommand, /* The function to run. */
+	1 /* One parameter are expected, which can take any value. */
+};
 
 /*-----------------------------------------------------------*/
 
@@ -195,7 +202,9 @@ void vRegisterCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xDumpRegsiter);
 	FreeRTOS_CLIRegisterCommand( &xGpio);
 	FreeRTOS_CLIRegisterCommand( &xDAC);
-	
+	FreeRTOS_CLIRegisterCommand( &xSPIRd);
+	FreeRTOS_CLIRegisterCommand( &xSPIWr);
+		
 	#ifdef SENSORS
 		FreeRTOS_CLIRegisterCommand( &xTemp);
 	#endif
@@ -547,4 +556,83 @@ xReturn = pdFALSE;
 
 }
 
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvSPIReadCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+const char *pcParameter;
+uint8_t  size;
+uint8_t *response=0;
+BaseType_t xParameterStringLength, xReturn;
+static UBaseType_t uxParameterNumber = 0;
+
+	/* Remove compile time warnings about unused parameters, and check the
+	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	write buffer length is adequate, so does not check for buffer overflows. */
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	
+	/* Obtain the parameter string. */
+	pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,		                /* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
+
+		/* Sanity check something was returned. */
+		configASSERT( pcParameter );
+
+		/* Return the parameter string. */
+		
+		size = (uint8_t)strtoul(pcParameter, NULL, 0);
+		response=SPI_read(size);
+
+		sprintf( pcWriteBuffer, "\r\nread value is: 0x%x \r", response);
+		xReturn = pdFALSE;
+					
+
+	return xReturn;
+}
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvSPIWriteCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+
+{
+const char *pcParameter;
+uint8_t  payload;
+uint8_t *response=0;
+BaseType_t xParameterStringLength, xReturn;
+static UBaseType_t uxParameterNumber = 0;
+
+	/* Remove compile time warnings about unused parameters, and check the
+	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	write buffer length is adequate, so does not check for buffer overflows. */
+	( void ) pcCommandString;
+	( void ) xWriteBufferLen;
+	configASSERT( pcWriteBuffer );
+	
+	/* Obtain the parameter string. */
+	pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,		                /* Return the next parameter. */
+							&xParameterStringLength	/* Store the parameter string length. */
+						);
+
+		/* Sanity check something was returned. */
+		configASSERT( pcParameter );
+
+		/* Return the parameter string. */
+		
+		payload = (uint8_t)strtoul(pcParameter, NULL, 16);
+		SPI_write(payload);
+
+		sprintf( pcWriteBuffer, "\r\nsent the following byte data to SPI slave: 0x%x \r", payload);
+		xReturn = pdFALSE;
+					
+
+	return xReturn;
+}
 /*-----------------------------------------------------------*/

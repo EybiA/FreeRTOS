@@ -35,6 +35,8 @@ extern "C" {
 #define TEMP_SENSOR_VOLTAGE_MV_AT_25                                760.0f
 #define ADC_REFERENCE_VOLTAGE_MV                                    3300.0f
 #define ADC_MAX_OUTPUT_VALUE                                        4095.0f
+#define ADC_SAMPLE_SIZE                                             50
+
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */

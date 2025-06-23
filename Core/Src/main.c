@@ -56,7 +56,6 @@ GETCHAR_PROTOTYPE
 int main(void)
 {
 
-  float V;
 
   HAL_Init();
   SystemClock_Config();
@@ -65,6 +64,7 @@ int main(void)
   MX_ADC1_Init();
   MX_DAC_Init();
   MX_TIM3_Init();
+  MX_SPI2_Init();
   MX_USART2_UART_Init();
   vRegisterCLICommands();
   osKernelInitialize();
@@ -73,7 +73,7 @@ int main(void)
   write_register (0x40020000,0xA80087AC);  // configuring PA5 pin to GPIO
     
   printf("\r\n<<<<<<<Hello from STM32F446RTE MCU UART (RTOS) terminal>>>>>\r\n");
-
+  
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   vUARTCommandConsoleStart(configUART_COMMAND_CONSOLE_STACK_SIZE,configUART_COMMAND_CONSOLE_TASK_PRIORITY);

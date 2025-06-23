@@ -79,6 +79,8 @@ static const CLI_Command_Definition_t xHelpCommand =
 	"adc                   : print analog reading from MCU ADC interface (pin PA5 input)\r\n"
 	"dac <lvl in mV        : output on MCU PA4 pin the DAC output analog voltage corresponding to the voltage level in mV in hex format\r\n"
 	"gpio                  : stop/resume GPIO PA#5 blinking LED on the board\r\n"
+	"spi_r <nnnn>          : receive on SPI bus for <nnnn> bytes\r\n"
+	"spi_w <dd>            : transmit on SPI bus one byte data 0xdd \r\n"
 	"\rrun-time-stats      : displays a table showing how much processing time each FreeRTOS task has used\r\n"
 	"\r=========================================================================================================\r\n",
 	prvHelpCommand,

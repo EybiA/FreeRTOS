@@ -38,7 +38,8 @@ extern SPI_HandleTypeDef hspi2;
 
 /* USER CODE END Private defines */
 
-void MX_SPI2_Init(void);
+extern uint8_t SPI_read(uint8_t size);
+extern void SPI_write(uint8_t *buff);
 
 /* USER CODE BEGIN Prototypes */
 

@@ -66,7 +66,8 @@
     "adc.h": "c",
     "i2c_driver.h": "c",
     "gpio.h": "c",
-    "dma.h": "c"
+    "dma.h": "c",
+    "tim.h": "c"
   },
   "idf.pythonInstallPath": "C:\\Users\\Administrator\\.espressif\\tools\\idf-python\\3.8.7\\python.exe",
   "cortex-debug.variableUseNaturalFormat": false

@@ -27,7 +27,7 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
-uint16_t adc_dma_buf[10];
+uint16_t adc_dma_buf[ADC_SAMPLE_SIZE];
 int32_t Value=0;
 int adc_conv_complete_flag;
 float voltage;
@@ -150,18 +150,18 @@ float read_ADC(void)
 
 	HAL_TIM_Base_Start(&htim3);
 
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_dma_buf , 10); // start ADC => DMA samples transfer
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_dma_buf , ADC_SAMPLE_SIZE); // start ADC => DMA samples transfer
 
 	while (adc_conv_complete_flag==0)   // waiting until DMA if filled with ADC data
 	{
 
   }
 
-	for(size_t ind = 0; ind < 10; ++ind) {
+	for(size_t ind = 0; ind < ADC_SAMPLE_SIZE; ++ind) {
 		Value += (uint32_t)adc_dma_buf[ind];
 
 	}
-	Value /=10;
+	Value /=ADC_SAMPLE_SIZE;
 	voltage = (0.001*Value * (ADC_REFERENCE_VOLTAGE_MV / ADC_MAX_OUTPUT_VALUE));
 	return voltage;  // removing DC offset contribution
 
